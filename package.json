@@ -39,6 +39,7 @@
     "format-message": "6.2.1",
     "htmlparser2": "3.10.0",
     "immutable": "3.8.1",
+    "js-cookie": "^3.0.1",
     "jszip": "^3.1.5",
     "minilog": "3.1.0",
     "scratch-parser": "5.0.0",
