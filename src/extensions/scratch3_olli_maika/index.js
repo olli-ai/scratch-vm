@@ -21,7 +21,7 @@ const blockIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYA
  * The url of the translate server.
  * @type {string}
  */
-const serverURL = 'https://users-dev.jenkins-x-viettel.iviet.com';
+const serverURL = 'https://staging.users.iviet.com';
 
 /**
  * How long to wait in ms before timing out requests to translate server.
