@@ -1,6 +1,7 @@
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const formatMessage = require('format-message');
+// const { performance } = require('perf_hooks');
 
 
 /**
@@ -37,6 +38,7 @@ class MaikaControllerBlocks {
     constructor (runtime) {
         this.runtime = runtime;
         this.token = '';
+        this.startTime = null;
     }
 
     /**
@@ -115,26 +117,53 @@ class MaikaControllerBlocks {
                         }
                     }
                 },
+                {
+                    opcode: 'textToSpeak',
+                    text: formatMessage({
+                        id: 'maika.textToSpeak',
+                        default: 'yêu cầu loa [CALLING_NAME] nói: [TEXT]',
+                        description: 'Yêu cầu maika nói'
+                    }),
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        TEXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: formatMessage({
+                                id: 'maika.defaultTextToSpeak',
+                                default: 'xin chào'
+                            })
+                        },
+                        CALLING_NAME: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "Maika"
+                        }
+                    }
+                },
             ],
         };
     }
     sendMessage(args){
-        console.log('')
-        fetch(serverURL + '/v1/user-device/control', {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            mode: 'cors', // no-cors, *cors, same-origin
-            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + this.token,
-            },
-            redirect: 'follow', // manual, *follow, error
-            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify({calling_name: args.CALLING_NAME, utterance: args.UTTERANCE}) // body data type must match "Content-Type" header
-          }).then(response => {
-              return response.json().message
-          });
+        if (this.startTime && (window.performance.now() - this.startTime)  < 1000){
+            console.log('Cannot request more than one time per second')
+            this.startTime = window.performance.now()
+        } else {
+            this.startTime = window.performance.now()
+            fetch(serverURL + '/v1/user-device/control', {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + this.token,
+                },
+                redirect: 'follow', // manual, *follow, error
+                referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: JSON.stringify({calling_name: args.CALLING_NAME, utterance: args.UTTERANCE}) // body data type must match "Content-Type" header
+              }).then(response => {
+                  return response.json().message
+              });
         }
+    }
     login(args){
         var endpoint = args.EMAIL ? '/v1/auth/login': '/v1/auth/otp/login';
         fetch(serverURL + endpoint, {
@@ -150,6 +179,28 @@ class MaikaControllerBlocks {
         }).then(response => { response.json().then(data => {
             this.token = data.data.access_token;
         })});
+    }
+    textToSpeak(args){
+        if (this.startTime && (window.performance.now() - this.startTime)  < 1000){
+            console.log('Cannot request more than one time per second')
+            this.startTime = window.performance.now()
+        } else {
+            this.startTime = window.performance.now()
+            fetch(serverURL + '/v1/user-device/control', {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + this.token,
+                },
+                redirect: 'follow', // manual, *follow, error
+                referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: JSON.stringify({calling_name: args.CALLING_NAME, utterance: 'repeat after me ' + args.TEXT}) // body data type must match "Content-Type" header
+              }).then(response => {
+                  return response.json().message
+              });
+        }
     }
 }
 
