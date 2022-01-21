@@ -1,6 +1,6 @@
 {
   "name": "@olli-vn/scratch-vm",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Virtual Machine for Scratch 3.0",
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",
